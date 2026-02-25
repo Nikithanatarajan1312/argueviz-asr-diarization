@@ -9,7 +9,23 @@
 Captures live microphone audio and produces a structured, timestamped transcript with per-speaker labels, turn boundaries, and argument role classifications, all running locally with no cloud dependencies.
 
 ```
-Mic → VAD → Speaker ID → Whisper STT → JSONL + WebSocket → React UI
+Microphone (sounddevice)
+        ↓
+Ring Buffer (90 seconds circular buffer)
+        ↓
+WebRTC VAD (segmentation)
+        ↓
+Speaker Enrollment + Classification (ECAPA-TDNN)
+        ↓
+Whisper STT (faster-whisper, int8 CPU)
+        ↓
+Append-only JSONL storage
+        ↓
+Turn Builder
+        ↓
+FastAPI WebSocket server
+        ↓
+React Debug UI
 ```
 
 **End-to-text latency: ~0.8–1.2 seconds on CPU.**
