@@ -57,7 +57,7 @@ import queue
 import threading
 import warnings
 from contextlib import asynccontextmanager
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, replace, field
 from typing import Any, Callable, Deque, Dict, List, Optional, Set, Tuple
 
 try:
@@ -68,6 +68,59 @@ try:
 except ImportError:
     HAS_FASTAPI = False
     WebSocket = Any  # type: ignore
+
+# =========================
+# Turn grouping (speaker turns, no LLM yet)
+# =========================
+TURN_GAP_SEC = 2.0          # end turn if gap between segments > this
+TURN_MAX_SEC = 25.0         # safety cap on single turn length
+
+
+@dataclass
+class Turn:
+    turn_id: int
+    speaker: str
+    start: float
+    end: float
+    text: str
+    seg_ids: List[int] = field(default_factory=list)
+    label: str = "pending"   # for future LLM labeling
+
+
+def classify_turn_rule_based(text: str) -> str:
+    t = text.lower().strip()
+    if "?" in t:
+        return "question"
+    if any(w in t for w in ["because", "since", "therefore", "so ", "thus", "hence"]):
+        return "premise"
+    if any(
+        w in t
+        for w in [
+            "but",
+            "however",
+            "although",
+            "though",
+            "yet",
+            "despite",
+            "on the other hand",
+            "disagree",
+            "not true",
+        ]
+    ):
+        return "counterclaim"
+    if any(
+        w in t
+        for w in [
+            "actually",
+            "in fact",
+            "that's wrong",
+            "incorrect",
+            "not really",
+            "i disagree",
+        ]
+    ):
+        return "rebuttal"
+    return "claim"
 
 warnings.filterwarnings("ignore", message="pkg_resources is deprecated")
 warnings.filterwarnings("ignore", category=UserWarning,    message=".*torchcodec.*")
@@ -149,6 +202,7 @@ RECLASSIFY_THROTTLE_SEC = 0.05
 
 # --- Output ---
 TRANSCRIPT_JSONL  = "transcript_v2.jsonl"
+TURNS_JSONL       = "turns_v1.jsonl"
 WS_PORT           = 8000
 
 # =========================
@@ -524,9 +578,10 @@ class SpeakerClassifier:
 # =========================
 def main():
     print("[INFO] Loading Whisper model...")
-    asr_model  = WhisperModel(WHISPER_SIZE, compute_type=WHISPER_COMPUTE)
-    ring       = RingBuffer(RING_SECONDS, SAMPLE_RATE)
-    jsonl      = JsonlManager(TRANSCRIPT_JSONL)
+    asr_model   = WhisperModel(WHISPER_SIZE, compute_type=WHISPER_COMPUTE)
+    ring        = RingBuffer(RING_SECONDS, SAMPLE_RATE)
+    jsonl       = JsonlManager(TRANSCRIPT_JSONL)
+    turns_jsonl = JsonlManager(TURNS_JSONL)
     seg_q: "queue.Queue[Optional[SpeechSegment]]" = queue.Queue()
     _stop      = threading.Event()
 
@@ -619,80 +674,51 @@ def main():
     # ---- Pending-U reclassification ----
     def _reclassify_pending_u() -> None:
         """
-        FIX 1: Processes exactly RECLASSIFY_BATCH_SIZE entries per invocation
-                (or fewer if the deque empties first), then reschedules itself
-                if more remain. Nothing is ever discarded.
-
-        FIX 2: Single-instance guard via _reclassify_running Event.
-                If already running, returns immediately — the active thread
-                will reschedule itself until the deque is fully drained.
-
-        Race-safety: _pending_u_lock is held only for the duration of each
-        individual popleft(), never across classify() or JSONL writes. New U
-        segments added concurrently simply append to the deque and are
-        processed in a subsequent batch.
+        Single thread processes batches until deque is empty; no rescheduling
+        so the guard has no race window. Batch size + throttle preserved.
         """
-        # FIX 2: guard — only one reclassify thread at a time
         if _reclassify_running.is_set():
             return
         _reclassify_running.set()
-
         try:
-            processed = 0
-            while processed < RECLASSIFY_BATCH_SIZE:
-                # Pop one entry under lock — minimal critical section
-                with _pending_u_lock:
-                    if not _pending_u_order:
-                        break
-                    seg_id = _pending_u_order.popleft()
-                    entry  = _pending_u.pop(seg_id, None)
+            while classifier.enrolled:
+                processed = 0
+                while processed < RECLASSIFY_BATCH_SIZE:
+                    with _pending_u_lock:
+                        if not _pending_u_order:
+                            return  # drained
+                        seg_id = _pending_u_order.popleft()
+                        entry  = _pending_u.pop(seg_id, None)
 
-                if entry is None:
-                    # Entry was evicted (cap hit) before we reached it
-                    continue
+                    if entry is None:
+                        continue
 
-                audio  = entry.get("audio")
-                record = entry.get("record")
+                    audio  = entry.get("audio")
+                    record = entry.get("record")
+                    if audio is None or len(audio) == 0 or record is None:
+                        print(f"[PATCH] seg_id={seg_id} — missing data, skipping.")
+                        continue
 
-                if audio is None or len(audio) == 0 or record is None:
-                    print(f"[PATCH] seg_id={seg_id} — missing data, skipping.")
-                    continue
+                    try:
+                        new_speaker, sim = classifier.classify(audio)
+                    except Exception as e:
+                        print(f"[PATCH] seg_id={seg_id} — classify error: {e}")
+                        continue
 
-                try:
-                    new_speaker, sim = classifier.classify(audio)
-                except Exception as e:
-                    print(f"[PATCH] seg_id={seg_id} — classify error: {e}")
-                    continue
+                    jsonl.patch_speaker(record, new_speaker)
+                    _broadcast_segment({
+                        "type":    "segment_patch",
+                        "seg_id":  seg_id,
+                        "speaker": new_speaker,
+                    })
+                    print(f"[PATCH] seg_id={seg_id}  U → {new_speaker}  sim={sim:.3f}")
 
-                jsonl.patch_speaker(record, new_speaker)
-                _broadcast_segment({
-                    "type":    "update",
-                    "seg_id":  seg_id,
-                    "speaker": new_speaker,
-                })
-                print(f"[PATCH] seg_id={seg_id}  U → {new_speaker}  sim={sim:.3f}")
-
-                processed += 1
-                # Yield CPU between segments so live ASR stays responsive
-                if processed < RECLASSIFY_BATCH_SIZE:
+                    processed += 1
                     time.sleep(RECLASSIFY_THROTTLE_SEC)
 
-            # Check if more entries arrived while we were processing
-            with _pending_u_lock:
-                more_remain = bool(_pending_u_order)
-
+                time.sleep(0.01)  # small yield between batches
         finally:
-            # FIX 2: always clear the guard before potentially rescheduling
             _reclassify_running.clear()
-
-        # FIX 1: reschedule if deque still has entries and classifier is ready
-        if more_remain and classifier.enrolled:
-            print(f"[PATCH] More entries remain — scheduling next batch.")
-            t = threading.Thread(target=_reclassify_pending_u, daemon=True)
-            t.start()
-        else:
-            if processed > 0:
-                print(f"[PATCH] Reclassification complete ({processed} segment(s) patched).")
 
     def _start_reclassify() -> None:
         """Start reclassify thread only if not already running (FIX 2)."""
@@ -704,6 +730,38 @@ def main():
     min_print_samples = int(0.3 * SAMPLE_RATE)
     merge_gap_sec     = MERGE_GAP_MS / 1000.0
     last_text         = {"t": "", "end": 0.0}
+
+    # ---- Turn buffer (speaker turns, no LLM yet) ----
+    turn_id = 0
+    turn_buf: Dict[str, Any] = {"active": None}
+    _last_turn_activity = [time.time()]
+    turn_lock = threading.Lock()
+
+    def maybe_flush_turn() -> None:
+        """Flush active turn to JSONL + WebSocket (thread-safe)."""
+        nonlocal turn_id
+        with turn_lock:
+            t: Optional[Turn] = turn_buf["active"]
+            if t is None:
+                return
+            turn_id += 1
+            t.turn_id = turn_id
+            t.label = classify_turn_rule_based(t.text)
+            turn_record = {
+                "type": "turn",
+                "turn_id": t.turn_id,
+                "speaker": t.speaker,
+                "start": round(t.start, 2),
+                "end": round(t.end, 2),
+                "text": t.text,
+                "label": t.label,
+                "seg_ids": t.seg_ids,
+            }
+            # clear active turn under lock
+            turn_buf["active"] = None
+        # I/O outside the lock
+        turns_jsonl.write(turn_record)
+        _broadcast_segment(turn_record)
 
     def transcribe_and_emit(seg: SpeechSegment) -> None:
         core_audio = ring.get_range(seg.start_sample, seg.end_sample)
@@ -779,6 +837,7 @@ def main():
             print(f"[{speaker}]{sim_str} [{asr_ms:.0f}ms] {text}")
 
             record = {
+                "type":    "segment",
                 "seg_id":  seg.seg_id,
                 "start":   round(start_sec, 2),
                 "end":     round(end_sec, 2),
@@ -803,6 +862,52 @@ def main():
                     }
                     _pending_u_order.append(seg.seg_id)
 
+            # If current segment is unknown, flush any active turn so we don't span across U gaps.
+            if speaker == "U":
+                maybe_flush_turn()
+
+            # ---- Turn building (speaker + time-gap based) ----
+            # Skip U-speaker segments for turn grouping; they still get segment records.
+            if speaker != "U":
+                seg_speaker = speaker
+                seg_start   = start_sec
+                seg_end     = end_sec
+                seg_text    = text
+
+                # First decide if we need to flush, based on current active turn snapshot.
+                flush_needed = False
+                with turn_lock:
+                    active = turn_buf["active"]
+                    if active is not None:
+                        gap = seg_start - active.end
+                        if seg_speaker != active.speaker:
+                            flush_needed = True
+                        elif gap is not None and gap > TURN_GAP_SEC:
+                            flush_needed = True
+                        elif (seg_end - active.start) > TURN_MAX_SEC:
+                            flush_needed = True
+
+                if flush_needed:
+                    maybe_flush_turn()
+
+                # Now (re)read and extend/start the active turn under lock.
+                with turn_lock:
+                    active = turn_buf["active"]
+                    if active is None:
+                        turn_buf["active"] = Turn(
+                            turn_id=0,
+                            speaker=seg_speaker,
+                            start=seg_start,
+                            end=seg_end,
+                            text=seg_text,
+                            seg_ids=[seg.seg_id],
+                        )
+                    else:
+                        active.end = seg_end
+                        active.seg_ids.append(seg.seg_id)
+                        active.text = (active.text + " " + seg_text).strip()
+                    _last_turn_activity[0] = time.time()
+
             _broadcast_segment(record)
         finally:
             _asr_processing[0] = False
@@ -817,6 +922,8 @@ def main():
             if item is None:
                 if pending_seg is not None:
                     transcribe_and_emit(pending_seg)
+                # flush any pending turn before exiting
+                maybe_flush_turn()
                 break
 
             seg     = item
@@ -878,6 +985,12 @@ def main():
     def status_broadcast_loop():
         while not _stop.is_set():
             time.sleep(0.2)
+            # If no new non-U segment arrives, flush the active turn after a little idle time.
+            with turn_lock:
+                active_turn = turn_buf.get("active")
+                last_turn_ts = _last_turn_activity[0]
+            if active_turn is not None and (time.time() - last_turn_ts) > (TURN_GAP_SEC + 0.5):
+                maybe_flush_turn()
             progress = classifier.enrollment_progress
             enrolled = classifier.enrolled
             seconds_left = 0.0 if enrolled else max(0.0, ENROLL_SPEECH_SEC * (1.0 - progress))
@@ -969,7 +1082,12 @@ def main():
             pass
         ingest_t.join(timeout=2.0)
         asr_t.join(timeout=3.0)
+        try:
+            maybe_flush_turn()
+        except Exception:
+            pass
         jsonl.close()
+        turns_jsonl.close()
         print(f"[INFO] Transcript saved → {TRANSCRIPT_JSONL}")
         if _low_energy_skips[0]:
             print(f"[INFO] Low-energy segments skipped: {_low_energy_skips[0]}")

@@ -80,3 +80,124 @@
 {"seg_id": 25, "start": 98.94, "end": 100.84, "speaker": "B", "text": "Drunk all this place!"}
 {"seg_id": 26, "start": 104.24, "end": 105.96, "speaker": "B", "text": "I'm done crying!"}
 {"seg_id": 35, "start": 160.2, "end": 161.6, "speaker": "A", "text": "Thank you."}
+{"seg_id": 1, "start": 0.08, "end": 3.84, "speaker": "U", "text": "Okay", "asr_ms": 366, "sim": null}
+{"seg_id": 2, "start": 4.82, "end": 5.92, "speaker": "U", "text": "Howdy!", "asr_ms": 348, "sim": null}
+{"seg_id": 3, "start": 8.18, "end": 9.22, "speaker": "U", "text": "How are you?", "asr_ms": 363, "sim": null}
+{"seg_id": 4, "start": 14.2, "end": 15.96, "speaker": "U", "text": "I'm doing great, how are you?", "asr_ms": 384, "sim": null}
+{"seg_id": 5, "start": 20.18, "end": 22.18, "speaker": "U", "text": "Thank you so much for asking.", "asr_ms": 376, "sim": null}
+{"seg_id": 6, "start": 27.08, "end": 29.02, "speaker": "U", "text": "Let me put...", "asr_ms": 391, "sim": null}
+{"seg_id": 1, "start": 0.08, "end": 3.84, "speaker": "A", "text": "Okay", "asr_ms": 366, "sim": null, "_patch": true}
+{"seg_id": 2, "start": 4.82, "end": 5.92, "speaker": "A", "text": "Howdy!", "asr_ms": 348, "sim": null, "_patch": true}
+{"seg_id": 3, "start": 8.18, "end": 9.22, "speaker": "A", "text": "How are you?", "asr_ms": 363, "sim": null, "_patch": true}
+{"seg_id": 4, "start": 14.2, "end": 15.96, "speaker": "A", "text": "I'm doing great, how are you?", "asr_ms": 384, "sim": null, "_patch": true}
+{"seg_id": 5, "start": 20.18, "end": 22.18, "speaker": "A", "text": "Thank you so much for asking.", "asr_ms": 376, "sim": null, "_patch": true}
+{"seg_id": 6, "start": 27.08, "end": 29.02, "speaker": "A", "text": "Let me put...", "asr_ms": 391, "sim": null, "_patch": true}
+{"seg_id": 7, "start": 29.28, "end": 37.28, "speaker": "B", "text": "I mean, I am. Thanks for meeting me here. Usually not an interweb dating guy barely ever used this fault tutor unless it's to put...", "asr_ms": 710, "sim": -0.018}
+{"seg_id": 8, "start": 39.66, "end": 41.24, "speaker": "A", "text": "Sorry, that was an ad.", "asr_ms": 355, "sim": 0.478}
+{"seg_id": 9, "start": 45.78, "end": 50.08, "speaker": "B", "text": "Conscription day is always the deadliest, maybe that's why this", "asr_ms": 430, "sim": 0.098}
+{"seg_id": 10, "start": 53.58, "end": 55.46, "speaker": "A", "text": "Okay, this isn't add.", "asr_ms": 353, "sim": 0.492}
+{"seg_id": 11, "start": 58.7, "end": 64.56, "speaker": "B", "text": "Thunrise is especially beautiful this morning, because I know it might be my last.", "asr_ms": 448, "sim": 0.142}
+{"seg_id": 14, "start": 67.1, "end": 68.76, "speaker": "B", "text": "Snape!", "asr_ms": 345, "sim": 0.097}
+{"seg_id": 16, "start": 70.06, "end": 73.12, "speaker": "B", "text": "Violet sort of gale.", "asr_ms": 348, "sim": 0.082}
+{"seg_id": 19, "start": 76.94, "end": 78.44, "speaker": "A", "text": "Is that your name?", "asr_ms": 346, "sim": 0.6}
+{"seg_id": 29, "start": 122.9, "end": 124.8, "speaker": "B", "text": "Liberty, liberty.", "asr_ms": 344, "sim": 0.301}
+{"seg_id": 30, "start": 127.98, "end": 129.0, "speaker": "B", "text": "Be a boy.", "asr_ms": 339, "sim": 0.395}
+{"seg_id": 31, "start": 131.32, "end": 132.12, "speaker": "B", "text": "Hello", "asr_ms": 325, "sim": 0.37}
+{"seg_id": 33, "start": 134.82, "end": 136.88, "speaker": "A", "text": "I'm talking.", "asr_ms": 349, "sim": 0.573}
+{"seg_id": 34, "start": 137.16, "end": 139.06, "speaker": "A", "text": "speaker A is talking", "asr_ms": 330, "sim": 0.671}
+{"seg_id": 35, "start": 142.82, "end": 146.16, "speaker": "A", "text": "Okay I think it was not recognizing my voice, I think.", "asr_ms": 408, "sim": 0.558}
+{"seg_id": 36, "start": 148.6, "end": 149.66, "speaker": "A", "text": "Okay, that's fine.", "asr_ms": 343, "sim": 0.45}
+{"seg_id": 37, "start": 159.32, "end": 161.52, "speaker": "A", "text": "Cool drill, fine.", "asr_ms": 336, "sim": 0.525}
+{"seg_id": 1, "start": 0.0, "end": 5.24, "speaker": "U", "text": "Hello! How are you?", "asr_ms": 530, "sim": null}
+{"seg_id": 4, "start": 8.34, "end": 10.96, "speaker": "U", "text": "I'm doing good. Thank you", "asr_ms": 368, "sim": null}
+{"seg_id": 7, "start": 18.54, "end": 20.02, "speaker": "U", "text": "Can you hear me?", "asr_ms": 327, "sim": null}
+{"seg_id": 9, "start": 22.6, "end": 23.46, "speaker": "U", "text": "Oh", "asr_ms": 376, "sim": null}
+{"seg_id": 1, "start": 0.0, "end": 5.24, "speaker": "A", "text": "Hello! How are you?", "asr_ms": 530, "sim": null, "_patch": true}
+{"seg_id": 4, "start": 8.34, "end": 10.96, "speaker": "A", "text": "I'm doing good. Thank you", "asr_ms": 368, "sim": null, "_patch": true}
+{"seg_id": 7, "start": 18.54, "end": 20.02, "speaker": "A", "text": "Can you hear me?", "asr_ms": 327, "sim": null, "_patch": true}
+{"seg_id": 15, "start": 41.48, "end": 45.42, "speaker": "A", "text": "Come on, no.", "asr_ms": 407, "sim": 0.427}
+{"seg_id": 9, "start": 22.6, "end": 23.46, "speaker": "B", "text": "Oh", "asr_ms": 376, "sim": null, "_patch": true}
+{"seg_id": 16, "start": 45.8, "end": 52.04, "speaker": "B", "text": "There it goes. Cheers!", "asr_ms": 356, "sim": 0.247}{"type": "segment", "seg_id": 1, "start": 0.0, "end": 4.78, "speaker": "U", "text": "Hi, can you hear me?", "asr_ms": 402, "sim": null}
+{"type": "segment", "seg_id": 3, "start": 6.8, "end": 10.18, "speaker": "U", "text": "I am Nikita and...", "asr_ms": 364, "sim": null}
+{"type": "segment", "seg_id": 4, "start": 11.5, "end": 12.38, "speaker": "U", "text": "Plums.", "asr_ms": 459, "sim": null}
+{"type": "segment", "seg_id": 5, "start": 13.8, "end": 14.46, "speaker": "U", "text": "Yeah", "asr_ms": 339, "sim": null}
+{"type": "segment", "seg_id": 1, "start": 0.0, "end": 4.78, "speaker": "A", "text": "Hi, can you hear me?", "asr_ms": 402, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 3, "start": 6.8, "end": 10.18, "speaker": "A", "text": "I am Nikita and...", "asr_ms": 364, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 4, "start": 11.5, "end": 12.38, "speaker": "B", "text": "Plums.", "asr_ms": 459, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 7, "start": 16.56, "end": 22.18, "speaker": "A", "text": "So turn your turn block takes a snapshot of active and decides.", "asr_ms": 465, "sim": 0.892}
+{"type": "segment", "seg_id": 5, "start": 13.8, "end": 14.46, "speaker": "B", "text": "Yeah", "asr_ms": 339, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 8, "start": 22.88, "end": 26.0, "speaker": "A", "text": "flush needed based on speaker change.", "asr_ms": 350, "sim": 0.742}
+{"type": "segment", "seg_id": 12, "start": 31.96, "end": 34.66, "speaker": "A", "text": "This is really interesting.", "asr_ms": 330, "sim": 0.646}
+{"type": "segment", "seg_id": 13, "start": 35.62, "end": 36.92, "speaker": "B", "text": "Topic", "asr_ms": 322, "sim": 0.359}
+{"type": "segment", "seg_id": 19, "start": 47.58, "end": 49.02, "speaker": "A", "text": "Did you know about that?", "asr_ms": 342, "sim": 0.618}
+{"type": "segment", "seg_id": 21, "start": 53.88, "end": 56.82, "speaker": "A", "text": "Let me quickly check.", "asr_ms": 335, "sim": 0.622}
+{"type": "segment", "seg_id": 22, "start": 58.74, "end": 61.72, "speaker": "A", "text": "YouTube and play an audio.", "asr_ms": 344, "sim": 0.703}
+{"type": "segment", "seg_id": 26, "start": 85.08, "end": 89.22, "speaker": "B", "text": "He's near a crucial initiative to Instagram, stick around and find out.", "asr_ms": 442, "sim": 0.069}
+{"type": "segment", "seg_id": 27, "start": 91.92, "end": 97.6, "speaker": "B", "text": "For Christians crawling through Instagram, some reels, photos and videos can be less than", "asr_ms": 497, "sim": 0.041}
+{"type": "segment", "seg_id": 28, "start": 99.76, "end": 100.08, "speaker": "B", "text": "You", "asr_ms": 310, "sim": 0.026}
+{"type": "segment", "seg_id": 29, "start": 100.82, "end": 102.96, "speaker": "B", "text": "AHHHHHHHHH", "asr_ms": 336, "sim": 0.145}
+{"type": "segment", "seg_id": 30, "start": 103.28, "end": 110.12, "speaker": "B", "text": "I make disciples of all nations, baptize them in the name.", "asr_ms": 421, "sim": 0.07}
+{"type": "segment", "seg_id": 32, "start": 113.8, "end": 115.66, "speaker": "A", "text": "Okay.", "asr_ms": 314, "sim": 0.453}
+{"type": "segment", "seg_id": 33, "start": 116.42, "end": 117.94, "speaker": "A", "text": "Can you recognize?", "asr_ms": 331, "sim": 0.724}
+{"type": "segment", "seg_id": 35, "start": 121.38, "end": 122.22, "speaker": "A", "text": "Thank you.", "asr_ms": 347, "sim": 0.687}
+{"type": "segment", "seg_id": 36, "start": 135.02, "end": 140.22, "speaker": "A", "text": "It takes in the similarity score and the latency.", "asr_ms": 373, "sim": 0.858}
+{"type": "segment", "seg_id": 39, "start": 154.8, "end": 155.1, "speaker": "B", "text": "You", "asr_ms": 327, "sim": 0.155}
+{"type": "segment", "seg_id": 41, "start": 165.16, "end": 166.24, "speaker": "B", "text": "I'm just gonna say...", "asr_ms": 336, "sim": 0.129}
+{"type": "segment", "seg_id": 1, "start": 0.0, "end": 7.08, "speaker": "U", "text": "Hello, I am currently", "asr_ms": 440, "sim": null}
+{"type": "segment", "seg_id": 2, "start": 7.38, "end": 10.24, "speaker": "U", "text": "Checking the um", "asr_ms": 363, "sim": null}
+{"type": "segment", "seg_id": 1, "start": 0.0, "end": 7.08, "speaker": "A", "text": "Hello, I am currently", "asr_ms": 440, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 2, "start": 7.38, "end": 10.24, "speaker": "A", "text": "Checking the um", "asr_ms": 363, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 4, "start": 11.66, "end": 17.54, "speaker": "A", "text": "testing the pipeline to see if everything is working as intended.", "asr_ms": 457, "sim": 0.854}
+{"type": "segment", "seg_id": 5, "start": 22.12, "end": 26.44, "speaker": "A", "text": "and I hope it is.", "asr_ms": 346, "sim": 0.764}
+{"type": "segment", "seg_id": 6, "start": 27.86, "end": 29.96, "speaker": "A", "text": "with low latency as well", "asr_ms": 345, "sim": 0.638}
+{"type": "segment", "seg_id": 7, "start": 32.04, "end": 33.08, "speaker": "A", "text": "because", "asr_ms": 326, "sim": 0.596}
+{"type": "segment", "seg_id": 8, "start": 34.08, "end": 36.48, "speaker": "A", "text": "I have implemented it correctly.", "asr_ms": 351, "sim": 0.691}
+{"type": "segment", "seg_id": 9, "start": 40.88, "end": 42.06, "speaker": "A", "text": "I think", "asr_ms": 330, "sim": 0.562}
+{"type": "segment", "seg_id": 10, "start": 42.48, "end": 44.78, "speaker": "A", "text": "I need a dog, yes.", "asr_ms": 366, "sim": 0.694}
+{"type": "segment", "seg_id": 11, "start": 45.66, "end": 47.38, "speaker": "A", "text": "I'm very lonely.", "asr_ms": 329, "sim": 0.653}
+{"type": "segment", "seg_id": 12, "start": 50.34, "end": 51.74, "speaker": "A", "text": "and having a dog.", "asr_ms": 349, "sim": 0.629}
+{"type": "segment", "seg_id": 13, "start": 52.2, "end": 52.72, "speaker": "A", "text": "Wood.", "asr_ms": 320, "sim": 0.46}
+{"type": "segment", "seg_id": 14, "start": 53.08, "end": 54.32, "speaker": "A", "text": "make me happy.", "asr_ms": 324, "sim": 0.629}
+{"type": "segment", "seg_id": 15, "start": 58.72, "end": 59.82, "speaker": "A", "text": "What do you think?", "asr_ms": 336, "sim": 0.658}
+{"type": "segment", "seg_id": 16, "start": 60.14, "end": 68.78, "speaker": "B", "text": "with the Father, and of the Son and at the Holy Spirit. Teaching them to observe all that I have come", "asr_ms": 496, "sim": 0.076}
+{"type": "segment", "seg_id": 18, "start": 81.68, "end": 85.28, "speaker": "B", "text": "Like, people know me as Lisa.", "asr_ms": 351, "sim": 0.03}
+{"type": "segment", "seg_id": 20, "start": 88.34, "end": 90.02, "speaker": "B", "text": "Okay", "asr_ms": 321, "sim": 0.35}
+{"type": "segment", "seg_id": 21, "start": 90.68, "end": 91.54, "speaker": "A", "text": "Got you.", "asr_ms": 318, "sim": 0.567}
+{"type": "segment", "seg_id": 22, "start": 93.86, "end": 95.14, "speaker": "A", "text": "Thanks, bye.", "asr_ms": 373, "sim": 0.517}
+{"type": "segment", "seg_id": 1, "start": 0.0, "end": 5.68, "speaker": "U", "text": "Hello, how are you doing?", "asr_ms": 400, "sim": null}
+{"type": "segment", "seg_id": 2, "start": 6.18, "end": 8.38, "speaker": "U", "text": "I'm doing great. How are you?", "asr_ms": 384, "sim": null}
+{"type": "segment", "seg_id": 4, "start": 11.2, "end": 15.16, "speaker": "U", "text": "Thank you for asking, and I'm doing good as well.", "asr_ms": 390, "sim": null}
+{"type": "segment", "seg_id": 6, "start": 20.08, "end": 22.32, "speaker": "U", "text": "I won't. Please tell me the name!", "asr_ms": 393, "sim": null}
+{"type": "segment", "seg_id": 1, "start": 0.0, "end": 5.68, "speaker": "A", "text": "Hello, how are you doing?", "asr_ms": 400, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 2, "start": 6.18, "end": 8.38, "speaker": "A", "text": "I'm doing great. How are you?", "asr_ms": 384, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 4, "start": 11.2, "end": 15.16, "speaker": "A", "text": "Thank you for asking, and I'm doing good as well.", "asr_ms": 390, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 7, "start": 22.88, "end": 26.38, "speaker": "B", "text": "Please tell me the name of the dragon who chose him.", "asr_ms": 501, "sim": 0.203}
+{"type": "segment", "seg_id": 6, "start": 20.08, "end": 22.32, "speaker": "A", "text": "I won't. Please tell me the name!", "asr_ms": 393, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 8, "start": 29.1, "end": 29.72, "speaker": "A", "text": "Oh.", "asr_ms": 325, "sim": 0.559}
+{"type": "segment", "seg_id": 9, "start": 32.16, "end": 40.06, "speaker": "A", "text": "I want a dog because i like dogs i really like animals", "asr_ms": 418, "sim": 0.732}
+{"type": "segment", "seg_id": 10, "start": 42.96, "end": 44.88, "speaker": "A", "text": "I don't like cats.", "asr_ms": 349, "sim": 0.592}
+{"type": "segment", "seg_id": 11, "start": 45.32, "end": 46.0, "speaker": "A", "text": "So", "asr_ms": 318, "sim": 0.511}
+{"type": "segment", "seg_id": 12, "start": 48.72, "end": 52.18, "speaker": "A", "text": "I don't like cats because they run away.", "asr_ms": 365, "sim": 0.677}
+{"type": "segment", "seg_id": 14, "start": 59.54, "end": 61.6, "speaker": "B", "text": "Because you will feel like this.", "asr_ms": 343, "sim": 0.041}
+{"type": "segment", "seg_id": 15, "start": 62.26, "end": 65.32, "speaker": "B", "text": "Please tell me the name of the dragon who shows you.", "asr_ms": 383, "sim": 0.186}
+{"type": "segment", "seg_id": 19, "start": 73.14, "end": 76.22, "speaker": "B", "text": "The reason I wrote by our Satan's POV pinnacle.", "asr_ms": 387, "sim": 0.009}
+{"type": "segment", "seg_id": 20, "start": 80.3, "end": 82.5, "speaker": "A", "text": "Okay. Thank you", "asr_ms": 359, "sim": 0.606}
+{"type": "segment", "seg_id": 22, "start": 85.54, "end": 86.26, "speaker": "B", "text": "Bye.", "asr_ms": 312, "sim": 0.31}
+{"type": "segment", "seg_id": 23, "start": 89.38, "end": 90.64, "speaker": "B", "text": "Bye!", "asr_ms": 313, "sim": 0.094}
+{"type": "segment", "seg_id": 24, "start": 92.46, "end": 93.22, "speaker": "B", "text": "Bye!", "asr_ms": 316, "sim": 0.354}
+{"type": "segment", "seg_id": 25, "start": 95.78, "end": 96.44, "speaker": "A", "text": "See ya!", "asr_ms": 315, "sim": 0.451}
+{"type": "segment", "seg_id": 1, "start": 0.0, "end": 4.72, "speaker": "U", "text": "Hi, can you hear me because I'm talking?", "asr_ms": 425, "sim": null}
+{"type": "segment", "seg_id": 3, "start": 8.08, "end": 8.88, "speaker": "U", "text": "Mm hmm.", "asr_ms": 355, "sim": null}
+{"type": "segment", "seg_id": 5, "start": 11.02, "end": 16.64, "speaker": "U", "text": "So my favorite animal is dog because it's really cute", "asr_ms": 388, "sim": null}
+{"type": "segment", "seg_id": 6, "start": 17.98, "end": 19.6, "speaker": "U", "text": "so do you want to buy a dog?", "asr_ms": 428, "sim": null}
+{"type": "segment", "seg_id": 1, "start": 0.0, "end": 4.72, "speaker": "A", "text": "Hi, can you hear me because I'm talking?", "asr_ms": 425, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 3, "start": 8.08, "end": 8.88, "speaker": "B", "text": "Mm hmm.", "asr_ms": 355, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 5, "start": 11.02, "end": 16.64, "speaker": "A", "text": "So my favorite animal is dog because it's really cute", "asr_ms": 388, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 7, "start": 21.72, "end": 26.26, "speaker": "A", "text": "I want to buy one because we stay together and they really need one.", "asr_ms": 535, "sim": 0.875}
+{"type": "segment", "seg_id": 6, "start": 17.98, "end": 19.6, "speaker": "A", "text": "so do you want to buy a dog?", "asr_ms": 428, "sim": null, "_patch": true}
+{"type": "segment", "seg_id": 8, "start": 36.74, "end": 39.32, "speaker": "B", "text": "forth when you're wasn't going to be there in the first place.", "asr_ms": 420, "sim": 0.043}
+{"type": "segment", "seg_id": 9, "start": 43.42, "end": 46.82, "speaker": "B", "text": "They swear in the face, they're stuck in the...", "asr_ms": 375, "sim": 0.019}
+{"type": "segment", "seg_id": 10, "start": 49.22, "end": 58.38, "speaker": "B", "text": "Celebrate one of a kind people with gifts and say I get here.", "asr_ms": 403, "sim": -0.156}
+{"type": "segment", "seg_id": 12, "start": 62.6, "end": 63.26, "speaker": "B", "text": "Okay", "asr_ms": 309, "sim": 0.321}
+{"type": "segment", "seg_id": 15, "start": 66.82, "end": 68.22, "speaker": "A", "text": "Thank you for the gift.", "asr_ms": 438, "sim": 0.519}
+{"type": "segment", "seg_id": 16, "start": 68.48, "end": 70.76, "speaker": "A", "text": "I really liked it.", "asr_ms": 333, "sim": 0.655}

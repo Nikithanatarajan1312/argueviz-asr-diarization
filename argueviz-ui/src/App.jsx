@@ -40,6 +40,7 @@ export default function App() {
     progress: null, // 0..1
     seconds_left: null,
     rms: null,
+    mode: null, // "listening" | "recording" | "processing"
   });
 
   const [segmentsById, setSegmentsById] = useState(() => new Map());
@@ -102,6 +103,7 @@ export default function App() {
           progress: typeof msg.progress === "number" ? msg.progress : prev.progress,
           seconds_left: typeof msg.seconds_left === "number" ? msg.seconds_left : prev.seconds_left,
           rms: typeof msg.rms === "number" ? msg.rms : prev.rms,
+          mode: typeof msg.mode === "string" ? msg.mode : prev.mode,
         }));
         return;
       }
@@ -150,6 +152,11 @@ export default function App() {
   const enrolledLabel =
     status.enrolled == null ? "Enrollment: (backend not sending status yet)" : status.enrolled ? "Enrolled" : "Enrolling";
 
+  const modeLabel =
+    status.mode === "processing" ? "Processing" :
+    status.mode === "recording" ? "Recording" :
+    status.mode === "listening" ? "Listening" : "—";
+
   return (
     <div className="page">
       <header className="header">
@@ -157,13 +164,33 @@ export default function App() {
           <div className="title">ARgueVis Speech Debug UI</div>
           <div className="subtitle">VAD segments • Enrollment • Speaker patches • Live transcript</div>
         </div>
+      </header>
 
-        <div className="conn">
+      {/* Live status strip: Connection, Enrollment, RMS, Mode */}
+      <div className="liveStatusStrip">
+        <div className="liveStatusItem">
+          <span className="liveStatusLabel">Connection</span>
           <span className={`dot ${connected ? "ok" : "bad"}`} />
           <span>{connected ? "Connected" : "Disconnected"}</span>
-          <span className="muted">{lastMsgAt ? `last msg: ${Math.round((Date.now() - lastMsgAt) / 1000)}s ago` : ""}</span>
         </div>
-      </header>
+        <div className="liveStatusItem">
+          <span className="liveStatusLabel">Enrollment</span>
+          <div className="liveStatusProgressWrap">
+            <div className="liveStatusProgressBar" style={{ width: `${Math.round(progress * 100)}%` }} />
+          </div>
+          <span className="liveStatusValue">
+            {status.seconds_left != null ? `${status.seconds_left.toFixed(1)}s left` : "—"}
+          </span>
+        </div>
+        <div className="liveStatusItem">
+          <span className="liveStatusLabel">Live RMS</span>
+          <span className="liveStatusValue">{status.rms != null ? status.rms.toFixed(4) : "—"}</span>
+        </div>
+        <div className="liveStatusItem">
+          <span className="liveStatusLabel">Mode</span>
+          <span className={`liveStatusMode liveStatusMode-${(status.mode || "").toLowerCase()}`}>{modeLabel}</span>
+        </div>
+      </div>
 
       <div className="grid">
         {/* Left: controls + status */}
@@ -258,8 +285,10 @@ export default function App() {
                 <div className="mono">{fmtSec(Number(s.end))}</div>
                 <div className="mono">{fmtSec(durationOf(s))}</div>
                 <div className={`speaker ${s.speaker === "A" ? "A" : s.speaker === "B" ? "B" : "U"}`}>
-                  {s.speaker ?? "?"}{s._patched ? " (patched)" : ""}
-                  {typeof s.sim === "number" ? <span className="muted"> • sim {s.sim.toFixed(3)}</span> : null}
+                  {s.speaker ?? "?"}
+                  {typeof s.sim === "number" ? ` (${s.sim.toFixed(3)})` : ""}
+                  {s._patched ? " (patched)" : ""}
+                  {typeof s.asr_ms === "number" ? `, ${s.asr_ms}ms` : ""}
                 </div>
                 <div className="textCell">{s.text ?? ""}</div>
               </div>

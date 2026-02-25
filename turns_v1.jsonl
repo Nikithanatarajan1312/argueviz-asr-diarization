@@ -1,0 +1,33 @@
+{"type": "turn", "turn_id": 1, "speaker": "A", "start": 11.66, "end": 17.54, "text": "testing the pipeline to see if everything is working as intended.", "label": "pending", "seg_ids": [4]}
+{"type": "turn", "turn_id": 2, "speaker": "A", "start": 22.12, "end": 26.44, "text": "and I hope it is.", "label": "pending", "seg_ids": [5]}
+{"type": "turn", "turn_id": 3, "speaker": "A", "start": 27.86, "end": 29.96, "text": "with low latency as well", "label": "pending", "seg_ids": [6]}
+{"type": "turn", "turn_id": 4, "speaker": "A", "start": 32.04, "end": 33.08, "text": "because", "label": "pending", "seg_ids": [7]}
+{"type": "turn", "turn_id": 5, "speaker": "A", "start": 34.08, "end": 36.48, "text": "I have implemented it correctly.", "label": "pending", "seg_ids": [8]}
+{"type": "turn", "turn_id": 6, "speaker": "A", "start": 40.88, "end": 42.06, "text": "I think", "label": "pending", "seg_ids": [9]}
+{"type": "turn", "turn_id": 7, "speaker": "A", "start": 42.48, "end": 44.78, "text": "I need a dog, yes.", "label": "pending", "seg_ids": [10]}
+{"type": "turn", "turn_id": 8, "speaker": "A", "start": 45.66, "end": 47.38, "text": "I'm very lonely.", "label": "pending", "seg_ids": [11]}
+{"type": "turn", "turn_id": 9, "speaker": "A", "start": 50.34, "end": 54.32, "text": "and having a dog. Wood. make me happy.", "label": "pending", "seg_ids": [12, 13, 14]}
+{"type": "turn", "turn_id": 10, "speaker": "A", "start": 58.72, "end": 59.82, "text": "What do you think?", "label": "pending", "seg_ids": [15]}
+{"type": "turn", "turn_id": 11, "speaker": "B", "start": 60.14, "end": 68.78, "text": "with the Father, and of the Son and at the Holy Spirit. Teaching them to observe all that I have come", "label": "pending", "seg_ids": [16]}
+{"type": "turn", "turn_id": 12, "speaker": "B", "start": 81.68, "end": 85.28, "text": "Like, people know me as Lisa.", "label": "pending", "seg_ids": [18]}
+{"type": "turn", "turn_id": 13, "speaker": "B", "start": 88.34, "end": 90.02, "text": "Okay", "label": "pending", "seg_ids": [20]}
+{"type": "turn", "turn_id": 14, "speaker": "A", "start": 90.68, "end": 91.54, "text": "Got you.", "label": "pending", "seg_ids": [21]}
+{"type": "turn", "turn_id": 15, "speaker": "A", "start": 93.86, "end": 95.14, "text": "Thanks, bye.", "label": "pending", "seg_ids": [22]}
+{"type": "turn", "turn_id": 1, "speaker": "B", "start": 22.88, "end": 26.38, "text": "Please tell me the name of the dragon who chose him.", "label": "pending", "seg_ids": [7]}
+{"type": "turn", "turn_id": 2, "speaker": "A", "start": 29.1, "end": 29.72, "text": "Oh.", "label": "pending", "seg_ids": [8]}
+{"type": "turn", "turn_id": 3, "speaker": "A", "start": 32.16, "end": 40.06, "text": "I want a dog because i like dogs i really like animals", "label": "pending", "seg_ids": [9]}
+{"type": "turn", "turn_id": 4, "speaker": "A", "start": 42.96, "end": 46.0, "text": "I don't like cats. So", "label": "pending", "seg_ids": [10, 11]}
+{"type": "turn", "turn_id": 5, "speaker": "A", "start": 48.72, "end": 52.18, "text": "I don't like cats because they run away.", "label": "pending", "seg_ids": [12]}
+{"type": "turn", "turn_id": 6, "speaker": "B", "start": 59.54, "end": 61.6, "text": "Because you will feel like this.", "label": "pending", "seg_ids": [14]}
+{"type": "turn", "turn_id": 7, "speaker": "B", "start": 62.26, "end": 65.32, "text": "Please tell me the name of the dragon who shows you.", "label": "pending", "seg_ids": [15]}
+{"type": "turn", "turn_id": 8, "speaker": "B", "start": 73.14, "end": 76.22, "text": "The reason I wrote by our Satan's POV pinnacle.", "label": "pending", "seg_ids": [19]}
+{"type": "turn", "turn_id": 9, "speaker": "A", "start": 80.3, "end": 82.5, "text": "Okay. Thank you", "label": "pending", "seg_ids": [20]}
+{"type": "turn", "turn_id": 10, "speaker": "B", "start": 85.54, "end": 86.26, "text": "Bye.", "label": "pending", "seg_ids": [22]}
+{"type": "turn", "turn_id": 11, "speaker": "B", "start": 89.38, "end": 93.22, "text": "Bye! Bye!", "label": "pending", "seg_ids": [23, 24]}
+{"type": "turn", "turn_id": 12, "speaker": "A", "start": 95.78, "end": 96.44, "text": "See ya!", "label": "pending", "seg_ids": [25]}
+{"type": "turn", "turn_id": 1, "speaker": "A", "start": 21.72, "end": 26.26, "text": "I want to buy one because we stay together and they really need one.", "label": "premise", "seg_ids": [7]}
+{"type": "turn", "turn_id": 2, "speaker": "B", "start": 36.74, "end": 39.32, "text": "forth when you're wasn't going to be there in the first place.", "label": "claim", "seg_ids": [8]}
+{"type": "turn", "turn_id": 3, "speaker": "B", "start": 43.42, "end": 46.82, "text": "They swear in the face, they're stuck in the...", "label": "claim", "seg_ids": [9]}
+{"type": "turn", "turn_id": 4, "speaker": "B", "start": 49.22, "end": 58.38, "text": "Celebrate one of a kind people with gifts and say I get here.", "label": "claim", "seg_ids": [10]}
+{"type": "turn", "turn_id": 5, "speaker": "B", "start": 62.6, "end": 63.26, "text": "Okay", "label": "claim", "seg_ids": [12]}
+{"type": "turn", "turn_id": 6, "speaker": "A", "start": 66.82, "end": 70.76, "text": "Thank you for the gift. I really liked it.", "label": "claim", "seg_ids": [15, 16]}
