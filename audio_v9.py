@@ -187,6 +187,32 @@ def _broadcast_segment(segment: dict) -> None:
         pass
 
 
+def _broadcast_status(payload: dict) -> None:
+    """Send status object for UI: enrollment progress, seconds left, live RMS, enrolled state."""
+    if not HAS_FASTAPI or _ws_loop is None:
+        return
+    msg = {"type": "status", **payload}
+
+    async def _send_all() -> None:
+        dead = []
+        with _ws_lock:
+            conns_snapshot = list(_ws_connections)
+        for ws in conns_snapshot:
+            try:
+                await ws.send_json(msg)
+            except Exception:
+                dead.append(ws)
+        if dead:
+            with _ws_lock:
+                for ws in dead:
+                    _ws_connections.discard(ws)
+
+    try:
+        asyncio.run_coroutine_threadsafe(_send_all(), _ws_loop)
+    except Exception:
+        pass
+
+
 if HAS_FASTAPI:
     @asynccontextmanager
     async def _lifespan(app: FastAPI) -> Any:
@@ -527,6 +553,7 @@ def main():
     classifier = SpeakerClassifier()
 
     _last_mic_print   = [0.0]
+    _last_rms         = [0.0]   # live RMS for status broadcaster
     _low_energy_skips = [0]
     audio_frame_q: "queue.Queue[Optional[np.ndarray]]" = queue.Queue(maxsize=2000)
 
@@ -535,9 +562,10 @@ def main():
         x = indata[:, 0].copy()
         x = np.nan_to_num(x, nan=0.0, posinf=0.0, neginf=0.0)
         x = np.clip(x, -1.0, 1.0)
+        rms = _rms(x)
+        _last_rms[0] = rms
         if time.time() - _last_mic_print[0] >= 1.0:
             _last_mic_print[0] = time.time()
-            rms = _rms(x)
             tag = ("enrolled" if classifier.enrolled
                    else f"enrolling {int(classifier.enrollment_progress * 100)}%")
             print(f"[MIC] rms={rms:.4f}  [{tag}]")
@@ -836,6 +864,23 @@ def main():
                 break
             time.sleep(0.05)
         print(f"[INFO] WebSocket at ws://localhost:{WS_PORT}/ws")
+
+    # ---- Status broadcaster (enrollment progress, seconds left, live RMS, enrolled) ----
+    def status_broadcast_loop():
+        while not _stop.is_set():
+            time.sleep(0.2)
+            progress = classifier.enrollment_progress
+            enrolled = classifier.enrolled
+            seconds_left = 0.0 if enrolled else max(0.0, ENROLL_SPEECH_SEC * (1.0 - progress))
+            _broadcast_status({
+                "enrolled": enrolled,
+                "progress": progress,
+                "seconds_left": round(seconds_left, 1),
+                "rms": round(_last_rms[0], 4),
+            })
+
+    status_t = threading.Thread(target=status_broadcast_loop, daemon=True)
+    status_t.start()
 
     # ---- CLI command listener ----
     def cli_loop():
