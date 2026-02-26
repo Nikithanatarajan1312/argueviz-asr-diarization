@@ -287,3 +287,9 @@ The base pipeline makes **0 cloud calls**. Everything runs locally:
 - No telemetry
 
 LLM labeling adds API calls only if explicitly configured.
+
+---
+
+## Other Improvements:
+1. Catching voice through multiple trials in a different voice - like siri
+2. Noisy environment - accuracy improvement
