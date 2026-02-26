@@ -293,3 +293,9 @@ LLM labeling adds API calls only if explicitly configured.
 ## Other Improvements:
 1. Catching voice through multiple trials in a different voice - like siri
 2. Noisy environment - accuracy improvement
+
+---
+
+LLMs to consider:
+Primary model: GPT‑4o‑class via API for high‑stakes argument mapping and suggestion generation.
+Fallback / local model: A quantized Llama 3 8B or Mistral 7B for low‑connectivity or low‑latency paths (e.g., quick tag/claim detection), accepting slightly lower accuracy for speed.
