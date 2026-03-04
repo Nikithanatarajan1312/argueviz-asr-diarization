@@ -363,7 +363,6 @@ for line in open("links_v1.jsonl"):
 
 ## Next steps
 
-1. **Argument graph UI** — visualize AU nodes and support/attack edges using the existing WebSocket link events
-2. **Sliding window LLM context** — pass the last N turns to GPT-4o for context-aware labeling (improves premise→claim linking accuracy)
-3. **Multi-speaker generalization** — replace single-anchor ECAPA with a clustering approach for N > 2 speakers
-4. **AR streaming** — pipe the argument graph to a Unity WebSocket client for on-device overlay rendering
+1. **Argument graph UI/output** 
+2. **Sliding window LLM context** 
+3. **AR streaming** — merge with main github repo
