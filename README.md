@@ -361,6 +361,10 @@ for line in open("links_v1.jsonl"):
 | only one works | use that one    | `medium`   |
 | both fail      | keep rule label | `rule`     |
 
+After labeling, each turn becomes an argument unit, and we detect simple relationships: premises support previous claims from the same speaker, while counterclaims or rebuttals attack the other speaker’s arguments.
+
+---
+
 ## Next steps
 
 1. **Argument graph UI/output** 
