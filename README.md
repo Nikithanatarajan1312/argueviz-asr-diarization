@@ -338,15 +338,20 @@ for line in open("links_v1.jsonl"):
 
 ---
 
-## Zero external API calls (base mode)
+## External API calls
 
-The base pipeline makes **0 cloud calls**:
+**First run only (model downloads):**
+- SpeechBrain ECAPA-TDNN downloads from HuggingFace (~100MB, cached to `pretrained_models/`)
+- Whisper `small` downloads from HuggingFace (~500MB, cached by faster-whisper)
 
-- No OpenAI
-- No HuggingFace hosted inference
-- No telemetry
+**Runtime — base mode (no LLM configured):**
+- 0 cloud calls. All inference runs locally — VAD, speaker ID, and Whisper are fully on-device.
+- No telemetry.
 
-LLM labeling and transcript repair add API calls only if `OPENAI_API_KEY` is set. Ollama runs fully offline.
+**Runtime — with LLM ensemble:**
+- OpenAI GPT-4o: one API call per flushed turn (~$0.003–0.005/session). Requires `OPENAI_API_KEY`.
+- Ollama llama3.2:3b: runs locally, 0 cloud calls. Requires a local Ollama instance.
+- Both are optional — the system degrades gracefully to rule-based labeling if neither is available.
 
 ---
 
