@@ -350,17 +350,6 @@ LLM labeling and transcript repair add API calls only if `OPENAI_API_KEY` is set
 
 ---
 
-## What's not built yet
-
-| Feature | Why not yet |
-|---|---|
-| Multi-speaker (>2) | ECAPA enrollment is single-anchor; N-speaker requires different architecture |
-| Per-segment LLM labeling | Too expensive and slow — turns are the right granularity |
-| Conversation history in LLM prompt | Context grows unbounded; use sliding window if needed |
-| AR integration | Later phase — Unity WebSocket client for on-device overlay |
-
----
-
 ## Next steps
 
 1. **Argument graph UI** — visualize AU nodes and support/attack edges using the existing WebSocket link events
