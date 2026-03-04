@@ -354,6 +354,12 @@ for line in open("links_v1.jsonl"):
 - Both are optional — the system degrades gracefully to rule-based labeling if neither is available.
 
 ---
+| Situation      | Result          | Confidence |
+| -------------- | --------------- | ---------- |
+| GPT = Llama    | use that label  | `high`     |
+| GPT ≠ Llama    | use GPT         | `low`      |
+| only one works | use that one    | `medium`   |
+| both fail      | keep rule label | `rule`     |
 
 ## Next steps
 
