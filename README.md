@@ -354,6 +354,28 @@ for line in open("links_v1.jsonl"):
 - Both are optional — the system degrades gracefully to rule-based labeling if neither is available.
 
 ---
+
+## Why GPT-4o and Llama 3.2
+
+The system uses two LLMs together to improve reliability while keeping latency and cost low.
+
+### GPT-4o (API model)
+GPT-4o is used because it provides strong reasoning and good accuracy for tasks like argument role classification and transcript cleanup.  
+It is relatively fast for an API model (around ~1 second response time) and has moderate cost (~$2.5 per 1M input tokens and ~$10 per 1M output tokens).  
+Because of this, GPT-4o acts as the main model for deciding the final argument label.
+
+### Llama 3.2 (3B, local model)
+Llama 3.2 runs locally using Ollama, so it has **no API cost** and works offline.  
+The 3B parameter version is lightweight and runs quickly on a laptop CPU, making it suitable for real-time pipelines.
+
+### Why use both
+Using both models together provides:
+- **Higher reliability** — if both models agree, the result is likely correct.
+- **Cost efficiency** — Llama runs locally without API charges.
+- **Robustness** — if one model fails or disagrees, the system still produces a result.
+
+The two models run in parallel, and their outputs are combined using a simple voting strategy to produce the final argument role label.
+
 | Situation      | Result          | Confidence |
 | -------------- | --------------- | ---------- |
 | GPT = Llama    | use that label  | `high`     |
