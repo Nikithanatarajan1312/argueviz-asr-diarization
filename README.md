@@ -1,83 +1,184 @@
 # ARgueVis Speech Pipeline
 
-> Real-time speech segmentation, speaker identification, and transcription, built as the foundation for live argumentation analysis and AR integration.
+> Real-time speech segmentation, speaker identification, transcription, and argument structure analysis — built as the foundation for live argumentation analysis and AR integration.
 
 ---
 
 ## What it does
 
-Captures live microphone audio and produces a structured, timestamped transcript with per-speaker labels, turn boundaries, and argument role classifications, all running locally with no cloud dependencies.
+Captures live microphone audio and produces a structured, timestamped transcript with per-speaker labels, turn boundaries, argument role classifications, LLM-repaired text, and argument links — all running locally with no required cloud dependencies.
 
 ```
 Microphone (sounddevice)
         ↓
 Ring Buffer (90 seconds circular buffer)
         ↓
-WebRTC VAD (segmentation)
+WebRTC VAD (20ms frame segmentation)
         ↓
 Speaker Enrollment + Classification (ECAPA-TDNN)
         ↓
-Whisper STT (faster-whisper, int8 CPU)
+Whisper STT (faster-whisper small, int8 CPU)
         ↓
-Append-only JSONL storage
+Turn Builder + Rule-based AU Labeling (instant)
         ↓
-Turn Builder
+LLM Ensemble: GPT-4o + llama3.2:3b (async patch, ~300–800ms)
+  └── Argument label (claim/premise/counterclaim/rebuttal/question/other)
+  └── Transcript repair (fixes Whisper errors in place)
+        ↓
+AU Link Detection (support/attack heuristic, tombstone-on-relabel)
         ↓
 FastAPI WebSocket server
         ↓
 React Debug UI
 ```
 
-**End-to-text latency: ~0.8–1.2 seconds on CPU.**
+**End-to-text latency: ~1.2–2.0 seconds on CPU (Whisper small). Use `WHISPER_SIZE = "base"` for ~0.8–1.2s if latency is too high.**
 
 ---
 
 ## Output
 
-Two append-only JSONL files are written in real time:
+Three append-only JSONL files are written in real time. All use **last-write-wins per `event_id`** — patches are written as new lines and consumers always take the last record for each `event_id`.
 
-**`transcript_v2.jsonl`** — one record per speech segment:
+---
+
+### `transcript_v2.jsonl` — one record per speech segment
+
 ```json
-{"type": "segment", "seg_id": 4, "start": 11.66, "end": 17.54,
- "speaker": "A", "text": "testing the pipeline to see if everything is working",
- "asr_ms": 457, "sim": 0.854}
+{
+  "type": "segment",
+  "event_id": "1748291234_3",
+  "seg_id": "1748291234_3",
+  "session_id": 1748291234,
+  "start": 11.66,
+  "end": 17.54,
+  "speaker": "A",
+  "text": "testing the pipeline to see if everything is working",
+  "asr_ms": 457,
+  "sim": 0.854,
+  "no_speech_prob": 0.02,
+  "ts": 1748291246.123
+}
 ```
 
-**`turns_v1.jsonl`** — consecutive same-speaker segments grouped into turns:
+Speaker patches (U → A/B after enrollment) are written with `"_patch": true` and the same `event_id` as the original segment.
+
+---
+
+### `turns_v1.jsonl` — grouped speaker turns with argument labels
+
 ```json
-{"type": "turn", "turn_id": 9, "speaker": "A", "start": 50.34, "end": 54.32,
- "text": "and having a dog would make me happy.", "label": "claim", "seg_ids": [12, 13, 14]}
+{
+  "type": "turn",
+  "event_id": "turn_9",
+  "turn_id": 9,
+  "session_id": 1748291234,
+  "speaker": "A",
+  "start": 50.34,
+  "end": 54.32,
+  "text": "Having a dog would make me happy.",
+  "raw_text": "having a dog would make me happy",
+  "label": "claim",
+  "au_id": "au_9",
+  "au_type": "claim",
+  "turn_conf": 0.71,
+  "confidence": "high",
+  "seg_ids": ["1748291234_12", "1748291234_13"],
+  "rule_label": "claim",
+  "gpt_label": "claim",
+  "gpt_cleaned_text": "Having a dog would make me happy.",
+  "llama_label": "claim",
+  "llama_cleaned_text": "Having a dog would make me happy.",
+  "ts": 1748291305.456
+}
 ```
 
-Speaker patches (U → A/B after enrollment) are written as full correction records with `"_patch": true`. Consumer always takes last record per `seg_id`.
+LLM patches arrive 300–800ms later with the same `event_id`, updating `text`, `label`, `confidence`, and per-model metadata in place.
+
+---
+
+### `links_v1.jsonl` — argument unit relations
+
+```json
+{
+  "type": "link",
+  "event_id": "link_1748291234_9_au_3",
+  "link_id": "link_1748291234_9_au_3",
+  "src_au": "au_9",
+  "dst_au": "au_3",
+  "relation": "support",
+  "confidence": 0.60,
+  "start": 50.34,
+  "end": 54.32,
+  "session_id": 1748291234,
+  "deleted": false,
+  "ts": 1748291305.500
+}
+```
+
+If the LLM relabels a turn and the old link is no longer valid, a tombstone is written with `"deleted": true` and the same `event_id`, followed by the correct new link.
+
+---
+
+## WebSocket event contract
+
+Every event carries `event_id`, `ts`, and `type`. **Frontend pattern — one line handles everything including patches:**
+
+```javascript
+const events = {};
+ws.onmessage = (msg) => {
+  const data = JSON.parse(msg.data);
+  events[data.event_id] = data;   // last-write-wins, patches are free
+  render();
+};
+```
+
+### Event types
+
+| Type | `event_id` | Description |
+|---|---|---|
+| `segment` | `seg_id` | New transcribed segment |
+| `segment` + `_patch: true` | `seg_id` | Speaker correction (U → A/B), overwrites original |
+| `turn` | `"turn_{id}"` | Completed speaker turn, rule-based label |
+| `turn` + `_patch: true` | `"turn_{id}"` | LLM label + text repair, overwrites original |
+| `link` | `"link_{session}_{turn}_{dst}"` | AU relation (support/attack) |
+| `link` + `deleted: true` | same `link_id` | Tombstone — remove this link |
+| `status` | `"status"` | Enrollment progress, RMS, mode |
 
 ---
 
 ## Architecture
 
-| Stage | Tool | Why |
+| Stage | Tool | Notes |
 |---|---|---|
 | Audio capture | `sounddevice` | Low-latency PortAudio bindings |
 | Ring buffer | `numpy` | 90s circular buffer, thread-safe |
-| VAD | `webrtcvad` | C-based, deterministic, 20ms frames |
-| Speaker ID | SpeechBrain ECAPA-TDNN | State-of-the-art embeddings, CPU-feasible |
-| STT | `faster-whisper` (base, int8) | Best local quality/latency tradeoff |
-| Storage | Append-only JSONL | Patch-safe, last-write-wins per seg_id |
+| VAD | `webrtcvad` | C-based, deterministic, 20ms frames, 8s hard cap |
+| Speaker ID | SpeechBrain ECAPA-TDNN | 512-dim embeddings, cosine sim, EMA anchor update |
+| STT | `faster-whisper` (small, int8) | `vad_filter=True`, `no_speech_prob` guard |
+| AU labeling | Rule-based (instant) + LLM ensemble (async) | GPT-4o + llama3.2:3b in parallel |
+| Transcript repair | GPT-4o + llama3.2:3b | Same API call as labeling — zero extra latency |
+| AU linking | Online heuristic | support/attack, tombstone-on-relabel, collision-safe IDs |
+| Storage | Append-only JSONL | Last-write-wins per `event_id` |
 | Streaming | FastAPI WebSocket | Low-latency, AR-client compatible |
-| UI | React (Vite) | Live monitoring and debug |
 
 ---
 
 ## Setup
 
 ```bash
-# Create environment
+# Python 3.10 or 3.11 only — SpeechBrain requirement
 conda create -n argueviz python=3.10
 conda activate argueviz
 
-# Install dependencies
+# Core dependencies
 pip install faster-whisper speechbrain torch torchaudio \
             sounddevice webrtcvad-wheels numpy fastapi uvicorn
+
+# LLM ensemble (optional but recommended)
+pip install openai
+brew install ollama && ollama pull llama3.2:3b && ollama serve
+export OPENAI_API_KEY=sk-...
 ```
 
 > HuggingFace token not required — the SpeechBrain model is public.
@@ -86,15 +187,12 @@ pip install faster-whisper speechbrain torch torchaudio \
 
 ## Running
 
-**Backend:**
 ```bash
-python audio_v10.py
-```
+# Backend
+python audio_v14.py
 
-**Frontend (optional):**
-```bash
-npm install
-npm run dev
+# Frontend (optional)
+npm install && npm run dev
 # open http://localhost:5173
 ```
 
@@ -104,25 +202,40 @@ npm run dev
 
 ## Enrollment
 
-The system passively enrolls the wearer's voice from the first 15 seconds of clean speech. No button press needed, just start talking.
+The system passively enrolls the wearer's voice. No button press needed.
 
 - Segments before enrollment complete are labeled `"U"` (unknown)
-- On enrollment completion, all pending `U` segments are reclassified and patched in JSONL
-- Press `r` + Enter to re-enroll (e.g. wearer changes)
-- Press `q` + Enter to quit
+- On enrollment, all pending `U` segments are reclassified and patched in JSONL
+- Terminal shows live progress: `enrolling 60% (6.1s/10.0s)`
+- **Auto force-enroll fires after 45 seconds** of wall time if passive enrollment stalls
+- The force-enroll RMS-gates on the actual 20s ring buffer slice — won't enroll on silence
 
-**Noisy room? Use these settings in `audio_v10.py`:**
-```python
-VAD_MODE          = 3       # default: 1
-ENROLL_MIN_RMS    = 0.010   # default: 0.005
-ENROLL_SPEECH_SEC = 20.0    # default: 15.0
-```
+### CLI commands (during a session)
+
+| Key | Action |
+|---|---|
+| `e` + Enter | Force-enroll immediately from last 20s of audio |
+| `r` + Enter | Re-enroll (e.g. wearer changes) |
+| `v` + Enter | Force-close the current VAD segment |
+| `q` + Enter | Quit |
+
+---
+
+## Room configuration
+
+On startup you're prompted for your environment. This sets VAD aggressiveness, RMS thresholds, and enrollment targets:
+
+| Mode | RMS threshold | Enrollment target | Auto-enroll fallback |
+|---|---|---|---|
+| 1 — Quiet (office, bedroom) | 0.005 | 10s | 45s |
+| 2 — Noisy (cafe, HVAC) | 0.012 | 15s | 45s |
+| 3 — Very noisy | 0.020 | 15s | 45s |
 
 ---
 
 ## Speaker classification tuning
 
-Observed cosine similarity ranges from the MacBook Air mic:
+Observed cosine similarity ranges from a MacBook Air mic:
 
 | Speaker | Sim range |
 |---|---|
@@ -130,172 +243,127 @@ Observed cosine similarity ranges from the MacBook Air mic:
 | Partner (B) | 0.02 – 0.09 |
 
 ```python
-SIM_THRESHOLD = 0.40   # lower if wearer labeled B; raise if partner labeled A
+SIM_THRESHOLD = 0.40   # lower if wearer is labeled B; raise if partner is labeled A
 ```
+
+`turn_conf` in each turn record is the mean cosine similarity of all A/B-labeled segments in that turn — a proxy for how confident speaker classification was.
 
 ---
 
-## Argument labeling (v1) - Draft | Need to confirm
+## Argument labeling
 
-Turns are labeled with argument roles using a rule-based classifier (instant) optionally patched by an LLM ensemble (async, ~300–800ms):
+Each flushed turn becomes an **Argument Unit (AU)**. Labeling happens in two stages:
+
+**Stage 1 — Rule-based (instant):**
 
 | Label | Trigger |
 |---|---|
+| `other` | Fewer than 4 words |
 | `question` | Contains `?` |
-| `premise` | Contains *because, since, therefore, thus* |
-| `counterclaim` | Contains *but, however, although, yet* |
-| `rebuttal` | Contains *actually, in fact, that's wrong* |
+| `premise` | Contains *because, since, therefore, thus, hence* |
+| `counterclaim` | Contains *but, however, although, yet, despite* |
+| `rebuttal` | Contains *actually, in fact, that's wrong, i disagree* |
 | `claim` | Default |
 
-**LLM ensemble (optional):** GPT-4o-mini + llama3.2:3b run in parallel. If they agree → `confidence: "high"`. If they disagree → rule-based tiebreaker → `confidence: "low"`. Requires `OPENAI_API_KEY` and a local Ollama instance.
+**Stage 2 — LLM ensemble (async, ~300–800ms):**
 
-```bash
-# Ollama setup (one-time)
-brew install ollama
-ollama pull llama3.2:3b
-ollama serve
+GPT-4o and llama3.2:3b run in parallel, each returning `{"label": "...", "cleaned_text": "..."}` in a single call — labeling and transcript repair happen simultaneously at no extra latency cost.
+
+| Outcome | `confidence` |
+|---|---|
+| Both models agree | `"high"` |
+| Disagree — GPT-4o wins | `"low"` |
+| Only one model responds | `"medium"` |
+| Both fail | `"rule"` (rule-based only) |
+
+The LLM patch overwrites the turn record in place (same `event_id`). Both models are fully optional.
+
+---
+
+## Transcript repair
+
+In the same LLM call that classifies argument role, GPT-4o repairs Whisper errors: dropped words, run-on repetitions, homophones, missing punctuation. The repaired text replaces `text` in the turn patch. The original Whisper output is always preserved in `raw_text`.
+
+```
+raw_text:  "i think the problem is is that we don't have enough time because of the the deadline"
+text:      "I think the problem is that we don't have enough time because of the deadline."
 ```
 
 ---
 
-## WebSocket message types
+## AU link detection
 
-| Type | Description |
-|---|---|
-| `segment` | New transcribed segment |
-| `segment_patch` | Speaker correction (U → A/B) |
-| `turn` | Completed speaker turn with label |
-| `turn_patch` | LLM label correction |
-| `status` | Enrollment progress, RMS, system mode |
+After each turn flushes, a heuristic checks the last 20 seconds of AU history:
+
+| Label | Relation | Target |
+|---|---|---|
+| `counterclaim` / `rebuttal` | `attack` | Most recent AU from the **other** speaker |
+| `premise` | `support` | Most recent `claim` from the **same** speaker |
+| `claim` / `question` / `other` | — | No link |
+
+If the LLM relabels a turn, the old rule-based link is tombstoned (`deleted: true`) and a new correct link is emitted. Both are written to `links_v1.jsonl` and broadcast over WebSocket. Link IDs are deterministic and collision-safe: `link_{session}_{turn_num}_{dst_au_id}`.
 
 ---
 
-## Latency profile (MacBook Air, CPU)
+## JSONL consumer pattern
+
+```python
+# Turns — last-write-wins handles all LLM patches automatically
+turns = {}
+for line in open("turns_v1.jsonl"):
+    r = json.loads(line)
+    turns[r["event_id"]] = r
+
+# Links — handle tombstones explicitly
+links = {}
+for line in open("links_v1.jsonl"):
+    r = json.loads(line)
+    if r.get("deleted"):
+        links.pop(r["event_id"], None)
+    else:
+        links[r["event_id"]] = r
+```
+
+---
+
+## Latency profile (MacBook Air M2, CPU)
 
 | Stage | Latency |
 |---|---|
 | VAD silence buffer | 400 ms |
 | Speaker embedding | 30–150 ms |
-| Whisper STT | 300–700 ms |
-| **End-to-text total** | **~0.8–1.2 s** |
-
----
-
-## Next steps
-
-What follows is an honest breakdown of what's feasible now, what's feasible with caveats, and what belongs to a later phase. Everything is designed to slot into the existing JSONL + WebSocket pipeline without architectural changes.
-
----
-
-### Step 1 — LLM argument role labeling - Ready to build
-
-**What:** Replace `"label": "pending"` on each turn with a real argument role: `claim`, `premise`, `counterclaim`, `rebuttal`, `question`, or `other`.
-
-**How:** Two LLMs run in parallel on each turn flush. Rule-based result is written instantly; LLM patch arrives 300–800ms later.
-
-```
-Turn flushes
-    ↓
-Rule-based label written immediately (instant)
-    ↓  (async thread)
-GPT-4o-mini ──┐
-               ├──► vote() ──► patch JSONL + broadcast turn_patch
-llama3.2:3b ──┘
-```
-
-**Why this pair:** GPT-4o-mini is fast (~300ms), cheap (~$0.05/session), and reliable at single-label classification. llama3.2:3b runs locally via Ollama — fully offline, no cost, ~500ms on M-series. Running both in parallel and voting gives a confidence signal that's genuinely useful: high confidence when they agree, flagged for review when they don't. Neither alone is as trustworthy as the pair.
-
-**Confidence logic:**
-| Outcome | Confidence |
-|---|---|
-| Both agree | `high` |
-| Disagree, rule-based breaks tie | `low` |
-| One fails | `medium` |
-| Both fail | rule-based only |
-
-**Feasibility: high.** Single API call per turn, async, non-blocking. 
-
-**Setup needed:**
-```bash
-pip install openai
-brew install ollama && ollama pull llama3.2:3b && ollama serve
-export OPENAI_API_KEY=your_key
-```
-
----
-
-### Step 2 — Premise-to-claim linking - Feasible with caveats
-
-**What:** After labeling individual turns, detect which premises support which claims. Output a linked structure:
-
-```json
-{"turn_id": 5, "label": "premise", "supports": 3}
-{"turn_id": 3, "label": "claim",   "supported_by": [5, 6]}
-```
-
-**Caveats:**
-- LLM must parse structured JSON output reliably — GPT-4o-mini handles this well with `response_format: json_object`, llama3.2:3b is less consistent and needs output validation
-- Links become stale if earlier turns get speaker-patched, need to re-run linking on affected window
-- Latency compounds: labeling + linking = two async calls per turn, ~600ms–1.5s total. Acceptable since both are non-blocking
-
-**Feasibility: medium.** Works well in controlled conditions. Degrades gracefully if the LLM hallucinates links, just write nothing rather than bad data.
-
----
-
-### Step 3 — Argument graph construction - Feasible but stateful
-
-```
-[claim: "I need a dog"]
-        ↑ supports
-[premise: "dogs reduce loneliness"]
-        ↑ supports
-[premise: "I live alone"]
-
-[counterclaim: "you travel too much"] ──attack──► [claim: "I need a dog"]
-```
-**Feasibility: medium-high** for sessions under 20 minutes. Needs explicit management for longer sessions.
-
-**Additional dependency:**
-```bash
-pip install networkx
-```
-
----
-
-### Step 4 — AR integration - Later phase
-
-**What:** Stream the argument graph to a Unity client running on AR glasses and render a real-time overlay.
-
----
-
-### What not to build yet
-
-| Feature | Why not yet |
-|---|---|
-| Multi-speaker (>2) | ECAPA enrollment is single-anchor; generalizing to N speakers requires a different classification architecture |
-| Per-segment LLM labeling | Too expensive and too slow — turns are the right granularity |
-| Conversation history in LLM prompt | Context grows unbounded; use sliding window instead |
+| Whisper STT (small) | 700–1200 ms |
+| **End-to-text total** | **~1.2–2.0 s** |
+| LLM label + repair patch | +300–800 ms (async, non-blocking) |
 
 ---
 
 ## Zero external API calls (base mode)
 
-The base pipeline makes **0 cloud calls**. Everything runs locally:
+The base pipeline makes **0 cloud calls**:
 
 - No OpenAI
 - No HuggingFace hosted inference
 - No telemetry
 
-LLM labeling adds API calls only if explicitly configured.
+LLM labeling and transcript repair add API calls only if `OPENAI_API_KEY` is set. Ollama runs fully offline.
 
 ---
 
-## Other Improvements:
-1. Catching voice through multiple trials in a different voice - like siri
-2. Noisy environment - accuracy improvement
+## What's not built yet
+
+| Feature | Why not yet |
+|---|---|
+| Multi-speaker (>2) | ECAPA enrollment is single-anchor; N-speaker requires different architecture |
+| Per-segment LLM labeling | Too expensive and slow — turns are the right granularity |
+| Conversation history in LLM prompt | Context grows unbounded; use sliding window if needed |
+| AR integration | Later phase — Unity WebSocket client for on-device overlay |
 
 ---
 
-LLMs to consider:
-Primary model: GPT‑4o‑class via API for high‑stakes argument mapping and suggestion generation.
-Fallback / local model: A quantized Llama 3 8B or Mistral 7B for low‑connectivity or low‑latency paths (e.g., quick tag/claim detection), accepting slightly lower accuracy for speed.
+## Next steps
+
+1. **Argument graph UI** — visualize AU nodes and support/attack edges using the existing WebSocket link events
+2. **Sliding window LLM context** — pass the last N turns to GPT-4o for context-aware labeling (improves premise→claim linking accuracy)
+3. **Multi-speaker generalization** — replace single-anchor ECAPA with a clustering approach for N > 2 speakers
+4. **AR streaming** — pipe the argument graph to a Unity WebSocket client for on-device overlay rendering
