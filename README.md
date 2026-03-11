@@ -472,3 +472,11 @@ Tested on 2-person debate (topic: university exams vs project-based evaluation):
 | AU labels | None — vague summary only | claim/premise/counterclaim/rebuttal/question/other |
 | Links | None | support/attack graph |
 | Real-time | REST poll | WebSocket stream |
+
+---
+## Next Steps
+
+Try other state of art models (benchmarking) and make comparisons
+Output generations 
+Integrate with frontend pipeline (update github)
+---
