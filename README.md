@@ -387,8 +387,95 @@ After labeling, each turn becomes an argument unit, and we detect simple relatio
 
 ---
 
-## Next steps
+## Running the Pipeline (audio_v15.py)
 
-1. **Argument graph UI/output** 
-2. **Sliding window LLM context** 
-3. **AR streaming** — merge with main github repo
+### 1. Install dependencies
+
+```bash
+conda activate argueviz
+pip install faster-whisper speechbrain torch torchaudio fastapi uvicorn openai python-multipart
+brew install ffmpeg
+```
+
+### 2. Install Ollama + fine-tuned model
+
+```bash
+brew install ollama
+ollama serve   # keep running in a separate terminal
+
+# Option A — fine-tuned model (recommended)
+python merge_and_export.py
+ollama create argueviz-llama -f Modelfile
+
+# Option B — base llama fallback
+ollama pull llama3.2:3b
+```
+
+### 3. Run
+
+```bash
+conda activate argueviz
+python audio_v15.py
+```
+
+Select room environment (1 = quiet, 2 = noisy, 3 = very noisy), then speak normally. The pipeline enrolls your voice in the first ~10 seconds automatically.
+
+---
+
+## This Week's Updates
+
+### Fine-tuned Argument Classifier (argueviz-llama)
+
+Fine-tuned `meta-llama/Llama-3.2-3B-Instruct` using LoRA to classify argument units in real-time conversation.
+
+**Training data:**
+- PERSUADE corpus — 2,500 argumentative essay segments (claim, premise, counterclaim, rebuttal)
+- ARgueVis session turns — 64 real conversation turns from live sessions
+- GPT-4o synthetic augmentation — 100 synthetic `question` examples to balance sparse label
+
+**Final dataset:** 528 training / 75 validation examples
+
+**Training:** Google Colab T4 GPU, LoRA (r=16, alpha=32), 4 epochs, ~20 min
+
+**Deployment:** Merged into base model, served locally via Ollama as `argueviz-llama`
+
+### Speaker Identification Improvement
+
+Replaced energy/ZCR hand-crafted features with ECAPA-TDNN neural speaker embeddings:
+- Cosine similarity between voice embeddings
+- EMA anchor update — wearer profile adapts gradually over session
+- Passive enrollment — no explicit calibration needed, enrolls from first ~10s of speech
+
+### Link Detection
+
+Added real-time support/attack link detection between argument units:
+- `counterclaim` / `rebuttal` → **attack** link to most recent opposing turn (within 20s)
+- `premise` → **support** link to most recent same-speaker `claim` (within 20s)
+
+---
+
+## Preliminary Accuracy (Live Session Test)
+
+Tested on 2-person debate (topic: university exams vs project-based evaluation):
+
+| Component | Result |
+|---|---|
+| Speaker ID | ~95% — sim 0.85–0.96 for wearer, negative for other person |
+| Transcription | ~90% — one mic-cutoff error observed |
+| Link detection | ~80% — attack/support chains mostly correct |
+| AU labels | ~65% — model over-predicts `premise`, needs more training data |
+
+**Known issue:** Fine-tuned model tends to classify most turns as `premise`, likely due to heavy premise/evidence distribution in PERSUADE corpus. Next step: collect more balanced real-session turns and retrain.
+
+---
+
+## Differences from Original server.py
+
+| | Original | This branch |
+|---|---|---|
+| ASR | openai-whisper base | faster-whisper small |
+| Speaker ID | Energy/ZCR features | ECAPA-TDNN embeddings |
+| LLM | Groq llama-3.1-8b | argueviz-llama (local) |
+| AU labels | None — vague summary only | claim/premise/counterclaim/rebuttal/question/other |
+| Links | None | support/attack graph |
+| Real-time | REST poll | WebSocket stream |
