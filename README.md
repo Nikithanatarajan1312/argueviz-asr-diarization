@@ -476,7 +476,7 @@ Tested on 2-person debate (topic: university exams vs project-based evaluation):
 ---
 ## Next Steps
 
-Try other state of art models (benchmarking) and make comparisons
-Output generations 
-Integrate with frontend pipeline (update github)
+1. Try other state of art models (benchmarking) and make comparisons
+2. Output generations 
+3. Integrate with frontend pipeline (update github)
 ---
