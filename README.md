@@ -439,18 +439,11 @@ Fine-tuned `meta-llama/Llama-3.2-3B-Instruct` using LoRA to classify argument un
 
 **Deployment:** Merged into base model, served locally via Ollama as `argueviz-llama`
 
-### Speaker Identification Improvement
-
-Replaced energy/ZCR hand-crafted features with ECAPA-TDNN neural speaker embeddings:
-- Cosine similarity between voice embeddings
-- EMA anchor update — wearer profile adapts gradually over session
-- Passive enrollment — no explicit calibration needed, enrolls from first ~10s of speech
-
 ### Link Detection
 
 Added real-time support/attack link detection between argument units:
-- `counterclaim` / `rebuttal` → **attack** link to most recent opposing turn (within 20s)
-- `premise` → **support** link to most recent same-speaker `claim` (within 20s)
+- `counterclaim` / `rebuttal` → **attack** link to most recent opposing turn 
+- `premise` → **support** link to most recent same-speaker `claim` 
 
 ---
 
