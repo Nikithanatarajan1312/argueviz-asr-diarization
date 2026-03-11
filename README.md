@@ -453,9 +453,9 @@ Tested on 2-person debate (topic: university exams vs project-based evaluation):
 
 | Component | Result |
 |---|---|
-| Speaker ID | ~95% — sim 0.85–0.96 for wearer, negative for other person |
-| Transcription | ~90% — one mic-cutoff error observed |
-| Link detection | ~80% — attack/support chains mostly correct |
+| Speaker ID | ~95%  |
+| Transcription | ~85%  |
+| Link detection | ~80% |
 | AU labels | ~65% — model over-predicts `premise`, needs more training data |
 
 **Known issue:** Fine-tuned model tends to classify most turns as `premise`, likely due to heavy premise/evidence distribution in PERSUADE corpus. Next step: collect more balanced real-session turns and retrain.
